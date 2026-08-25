@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Configura tu sorpresa 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="card">
+
+  <!-- SCREEN 0: SETUP (solo se ve si el enlace no trae datos) -->
+  <div class="screen active" id="setup">
+    <h1 class="pixel" style="font-size:14px;">CONFIGURA TU<br>SORPRESA 💌</h1>
+    <div class="setup-field">
+      <label class="setup-label">Tu nombre</label>
+      <input type="text" id="setupSender" class="setup-input" placeholder="Tu nombre">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Nombre de tu cita</label>
+      <input type="text" id="setupRecipient" class="setup-input" placeholder="Nombre de tu cita">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Actividades a incluir</label>
+      <div class="setup-checks" id="setupChecks"></div>
+      <button type="button" id="clearAllActs" class="clear-all-btn">Borrar todo</button>
+      <div class="setup-add-row">
+        <input type="text" id="setupCustomAct" class="setup-input" placeholder="Otra actividad...">
+        <button type="button" id="setupAddAct" class="setup-add-btn">Agregar</button>
+      </div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Mensaje de la carta</label>
+      <textarea id="setupMessage" class="setup-input setup-textarea"></textarea>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Frase de cierre</label>
+      <input type="text" id="setupClosing" class="setup-input" placeholder="Te quiero">
+    </div>
+    <button class="confirm-btn" id="generateLink">GENERAR ENLACE 🔗</button>
+    <div id="linkResult" class="link-result" style="display:none;">
+      <div class="sub">¡Listo! Copia y envía este enlace:</div>
+      <div class="link-box">
+        <input type="text" id="generatedLink" readonly>
+        <button id="copyLink" class="copy-btn pixel">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: ASK -->
+  <div class="screen" id="ask">
+    <div class="cat-wrap">
+      <div class="cat-frame"><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="cat" id="cat">
+        <img id="catImg" src="assets/no.gif" alt="gato" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      </div>
+    </div>
+    <h1 class="pixel"><span id="nameInTitle">Dania</span>,<br><span id="questionText">¿quieres salir conmigo?</span></h1>
+    <div class="sub" id="teaseText">&nbsp;</div>
+    <div class="btn-row" id="btnRow">
+      <button id="yesBtn" class="pixel">SÍ<span style="font-size:.7em;">✦</span></button>
+      <button id="noBtn" class="pixel">No</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: YAY -->
+  <div class="screen" id="yay">
+    <div class="cat-wrap">
+      <div class="cat-frame"><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="cat happy">
+        <img src="assets/yay.gif" alt="yay" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      </div>
+    </div>
+    <h1 class="pixel">¡YAY!</h1>
+    <div class="sub">Qué feliz me haces al decir que sí.</div>
+    <button class="continue-btn" id="toActivity">PRESIONA PARA CONTINUAR <span>&rarr;</span></button>
+  </div>
+
+  <!-- SCREEN 3: ACTIVITY PICKER -->
+  <div class="screen" id="activity">
+    <div class="cat-wrap">
+      <div class="cat-frame"><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="cat happy">
+        <img src="assets/tipo.gif" alt="tipo de cita" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      </div>
+    </div>
+    <h1 class="pixel" style="font-size:13px;">¿QUÉ TE GUSTARÍA<br>HACER?</h1>
+    <div class="activity-grid" id="activityGrid">
+      <!-- Los botones se generan automáticamente desde CONFIG.activities -->
+    </div>
+    <button class="confirm-btn" id="lockIn" disabled>CONFIRMAR 🔒</button>
+  </div>
+
+  <!-- SCREEN 4: DATE PICKER -->
+  <div class="screen" id="datePick">
+    <div class="cat-wrap">
+      <div class="cat-frame"><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="cat happy">
+        <img src="assets/maybe.gif" alt="maybe" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      </div>
+    </div>
+    <h1 class="pixel">ELIGE LA FECHA</h1>
+    <div class="sub">Elige el día para nuestro plan</div>
+    <input type="date" id="dateInput">
+    <button class="confirm-btn" id="confirmDate">Confirmar fecha</button>
+  </div>
+
+  <!-- SCREEN 4.5: IT'S A DATE (confirmation summary) -->
+  <div class="screen" id="itsADate">
+    <div class="cat-wrap">
+      <div class="cat-frame"><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="cat happy">
+        <img src="assets/confirmacion.gif" alt="confirmación" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      </div>
+    </div>
+    <h1 class="pixel">¡ES UNA CITA!</h1>
+    <div class="date-summary pixel" id="dateSummary"></div>
+    <button class="continue-btn" id="toNotify">CONTINUAR <span>&rarr;</span></button>
+  </div>
+
+  <!-- SCREEN 5: NOTIFICATION -->
+  <div class="screen" id="notify">
+    <div class="notify-wrap">
+      <button class="notify-btn pixel" id="openMessage">
+        <span class="heart">♥</span> 1 NEW MESSAGE
+      </button>
+    </div>
+    <div class="sub" style="margin-top:14px;">Toca para ver tu mensaje</div>
+  </div>
+
+  <!-- SCREEN 3: LETTER -->
+  <div class="screen" id="letter">
+    <h1 class="pixel">Para <span id="nameInLetter">Dania</span> <span class="heart">♥</span></h1>
+    <div class="letter" id="letterBody"></div>
+    <div class="signature pixel" style="font-size:11px;">xoxo, <span id="senderInSignature">Ricardo</span></div>
+    <footer>hecho con <span class="heart">♥</span> para ti</footer>
+  </div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
