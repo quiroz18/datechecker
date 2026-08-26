@@ -7,28 +7,26 @@
   ];
   const DEFAULT_MESSAGE = "sé que las palabras nunca me alcanzan del todo, pero quiero intentarlo: contigo hasta los días normales se sienten especiales. Gracias por decir que sí.";
   const DEFAULT_CLOSING = "Te quiero";
+  const FIELD_SEP = "*"; // separador entre campos dentro de ?d=...
 
   // ============================================================
-  // Lee el enlace: si trae ?to=...&from=...&acts=... viene ya
-  // configurado (así lo abre la persona invitada). Si no trae
-  // nada, es quien está armando la sorpresa y ve el formulario.
+  // Lee el enlace: si trae ?d=sender~~recipient~~acts~~msg~~closing
+  // viene ya configurado (así lo abre la persona invitada). Si no
+  // trae nada, es quien está armando la sorpresa y ve el formulario.
   // ============================================================
   const urlParams = new URLSearchParams(location.search);
-  const urlTo = urlParams.get('to');
-  const urlFrom = urlParams.get('from');
-  const urlActs = urlParams.get('acts');
-  const urlMsg = urlParams.get('msg');
-  const urlClosing = urlParams.get('closing');
-  const isConfigured = !!(urlTo && urlFrom);
+  const packedData = urlParams.get('d');
+  const parts = packedData ? packedData.split(FIELD_SEP) : null;
+  const isConfigured = !!(parts && parts[0] && parts[1]);
 
   const CONFIG = {
-    recipientName: isConfigured ? urlTo : "Dania",
-    senderName: isConfigured ? urlFrom : "Ricardo",
+    recipientName: isConfigured ? parts[1] : "Dania",
+    senderName: isConfigured ? parts[0] : "Ricardo",
     question: "¿quieres salir conmigo?",
-    letterMessage: (isConfigured && urlMsg) ? urlMsg : DEFAULT_MESSAGE,
-    closing: (isConfigured && urlClosing) ? urlClosing : DEFAULT_CLOSING,
-    activities: (isConfigured && urlActs
-      ? urlActs.split('|')
+    letterMessage: (isConfigured && parts[3]) ? parts[3] : DEFAULT_MESSAGE,
+    closing: (isConfigured && parts[4]) ? parts[4] : DEFAULT_CLOSING,
+    activities: (isConfigured && parts[2]
+      ? parts[2].split('|')
       : DEFAULT_ACTIVITIES
     ).map(label => ({ label: label.toUpperCase(), value: label.toLowerCase() }))
   };
@@ -202,16 +200,14 @@
     }
 
     const base = location.href.split('?')[0];
+    const packed = [sender, recipient, checked.join('|'), message, closing].join(FIELD_SEP);
     const url = new URL(base);
-    url.searchParams.set('from', sender);
-    url.searchParams.set('to', recipient);
-    url.searchParams.set('acts', checked.join('|'));
-    url.searchParams.set('msg', message);
-    url.searchParams.set('closing', closing);
+    url.searchParams.set('d', packed);
 
     const linkInput = document.getElementById('generatedLink');
     linkInput.value = url.toString();
     document.getElementById('linkResult').style.display = 'block';
+    document.getElementById('shortenStatus').textContent = '';
   });
 
   document.getElementById('copyLink').addEventListener('click', ()=>{
@@ -223,6 +219,29 @@
       btn.textContent = '¡Copiado!';
       setTimeout(()=>{ btn.textContent = original; }, 1500);
     });
+  });
+
+  // Acortar más (opcional): intenta usar un servicio externo de
+  // enlaces cortos. Si no responde o está bloqueado, no pasa nada
+  // — se queda con el enlace normal, que siempre funciona.
+  document.getElementById('shortenLink').addEventListener('click', ()=>{
+    const linkInput = document.getElementById('generatedLink');
+    const statusEl = document.getElementById('shortenStatus');
+    const longUrl = linkInput.value;
+    statusEl.textContent = 'Acortando...';
+    fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl))
+      .then(res => { if(!res.ok) throw new Error('fail'); return res.text(); })
+      .then(shortUrl => {
+        if(shortUrl && shortUrl.startsWith('http')){
+          linkInput.value = shortUrl.trim();
+          statusEl.textContent = '¡Enlace acortado!';
+        } else {
+          throw new Error('respuesta inválida');
+        }
+      })
+      .catch(()=>{
+        statusEl.textContent = 'No se pudo acortar automáticamente — usa el enlace de arriba, funciona igual.';
+      });
   });
 
   // ============================================================
