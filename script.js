@@ -229,7 +229,7 @@
     const statusEl = document.getElementById('shortenStatus');
     const longUrl = linkInput.value;
     statusEl.textContent = 'Acortando...';
-    fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl))
+    fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl))
       .then(res => { if(!res.ok) throw new Error('fail'); return res.text(); })
       .then(shortUrl => {
         if(shortUrl && shortUrl.startsWith('http')){
