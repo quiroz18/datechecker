@@ -207,7 +207,6 @@
     const linkInput = document.getElementById('generatedLink');
     linkInput.value = url.toString();
     document.getElementById('linkResult').style.display = 'block';
-    document.getElementById('shortenStatus').textContent = '';
   });
 
   document.getElementById('copyLink').addEventListener('click', ()=>{
@@ -219,29 +218,6 @@
       btn.textContent = '¡Copiado!';
       setTimeout(()=>{ btn.textContent = original; }, 1500);
     });
-  });
-
-  // Acortar más (opcional): intenta usar un servicio externo de
-  // enlaces cortos. Si no responde o está bloqueado, no pasa nada
-  // — se queda con el enlace normal, que siempre funciona.
-  document.getElementById('shortenLink').addEventListener('click', ()=>{
-    const linkInput = document.getElementById('generatedLink');
-    const statusEl = document.getElementById('shortenStatus');
-    const longUrl = linkInput.value;
-    statusEl.textContent = 'Acortando...';
-    fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl))
-      .then(res => { if(!res.ok) throw new Error('fail'); return res.text(); })
-      .then(shortUrl => {
-        if(shortUrl && shortUrl.startsWith('http')){
-          linkInput.value = shortUrl.trim();
-          statusEl.textContent = '¡Enlace acortado!';
-        } else {
-          throw new Error('respuesta inválida');
-        }
-      })
-      .catch(()=>{
-        statusEl.textContent = 'No se pudo acortar automáticamente — usa el enlace de arriba, funciona igual.';
-      });
   });
 
   // ============================================================
