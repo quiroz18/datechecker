@@ -266,18 +266,39 @@ async function renderMyInvites(){
   list.innerHTML = '';
   rows.forEach((data, i) => {
     const item = document.createElement('div');
+    item.className = data.responded ? 'invite-item' : 'invite-item pending';
+
+    const textSpan = document.createElement('span');
     if(data.responded){
       let dateStr = data.chosen_date || '';
       if(data.chosen_date){
         const d = new Date(data.chosen_date + 'T00:00:00');
         dateStr = d.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
       }
-      item.className = 'invite-item';
-      item.innerHTML = `<b>${data.recipient_name}</b>: ¡dijo que sí! ${data.chosen_activity} el ${dateStr} <button class="mini-cal-btn" data-idx="${i}" type="button">📅</button>`;
+      textSpan.innerHTML = `<b>${data.recipient_name}</b>: ¡dijo que sí! ${data.chosen_activity} el ${dateStr}`;
     } else {
-      item.className = 'invite-item pending';
-      item.textContent = `${data.recipient_name}: esperando respuesta...`;
+      textSpan.textContent = `${data.recipient_name}: esperando respuesta...`;
     }
+    item.appendChild(textSpan);
+
+    if(data.responded){
+      const calBtn = document.createElement('button');
+      calBtn.className = 'mini-cal-btn';
+      calBtn.type = 'button';
+      calBtn.textContent = '📅';
+      calBtn.dataset.idx = i;
+      item.appendChild(calBtn);
+    }
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'mini-del-btn';
+    delBtn.type = 'button';
+    delBtn.title = `Borrar la invitación de ${data.recipient_name}`;
+    delBtn.textContent = '🗑️';
+    delBtn.dataset.id = data.id;
+    delBtn.dataset.name = data.recipient_name;
+    item.appendChild(delBtn);
+
     list.appendChild(item);
   });
 
@@ -287,6 +308,21 @@ async function renderMyInvites(){
       const title = `${data.chosen_activity} con ${data.recipient_name}`;
       const desc = `¡Es una cita! ${data.chosen_activity} — confirmado con ${data.recipient_name}.`;
       downloadICS(buildICS(title, desc, data.chosen_date), 'nuestra-cita.ics');
+    });
+  });
+
+  list.querySelectorAll('.mini-del-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ok = confirm(`¿Borrar la invitación de ${btn.dataset.name}? Esto no se puede deshacer.`);
+      if(!ok) return;
+      btn.disabled = true;
+      const { error } = await sb.from('dates').delete().eq('id', btn.dataset.id);
+      if(error){
+        alert('No se pudo borrar. Intenta de nuevo.');
+        btn.disabled = false;
+        return;
+      }
+      renderMyInvites();
     });
   });
 }
