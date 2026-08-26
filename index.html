@@ -15,9 +15,21 @@
 
 <div class="card">
 
-  <!-- SCREEN 0: SETUP (solo se ve si el enlace no trae datos) -->
-  <div class="screen active" id="setup">
+  <!-- SCREEN: LOADING (mientras se consulta Supabase) -->
+  <div class="screen active" id="loading">
+    <h1 class="pixel" style="font-size:14px;">Cargando...</h1>
+  </div>
+
+  <!-- SCREEN 0: SETUP (solo se ve si el enlace no trae un id) -->
+  <div class="screen" id="setup">
     <h1 class="pixel" style="font-size:14px;">CONFIGURA TU<br>SORPRESA 💌</h1>
+
+    <div class="setup-field" id="myInvitesSection" style="display:none;">
+      <label class="setup-label">Tus invitaciones</label>
+      <div id="myInvitesList" class="invites-list"></div>
+      <button type="button" id="refreshInvites" class="clear-all-btn">Actualizar</button>
+    </div>
+
     <div class="setup-field">
       <label class="setup-label">Tu nombre</label>
       <input type="text" id="setupSender" class="setup-input" placeholder="Tu nombre">
@@ -45,13 +57,18 @@
     </div>
     <button class="confirm-btn" id="generateLink">GENERAR ENLACE 🔗</button>
     <div id="linkResult" class="link-result" style="display:none;">
-      <div class="sub">¡Listo! Copia y envía este enlace:</div>
+      <div class="sub">1. Envíale este enlace a tu cita:</div>
       <div class="link-box">
         <input type="text" id="generatedLink" readonly>
         <button id="copyLink" class="copy-btn pixel">Copiar</button>
       </div>
-      <div class="shorten-tip">¿Lo quieres más corto? Pégalo en <a href="https://is.gd" target="_blank" rel="noopener">is.gd</a> o <a href="https://tinyurl.com" target="_blank" rel="noopener">tinyurl.com</a> — ahí sí se puede acortar manualmente.</div>
+      <div class="sub" style="margin-top:14px;">2. Guarda este para ver su respuesta (solo para ti):</div>
+      <div class="link-box">
+        <input type="text" id="trackingLink" readonly>
+        <button id="copyTrackingLink" class="copy-btn pixel">Copiar</button>
+      </div>
     </div>
+    <div id="setupError" class="setup-error"></div>
   </div>
 
   <!-- SCREEN 1: ASK -->
@@ -127,6 +144,7 @@
     </div>
     <h1 class="pixel">¡ES UNA CITA!</h1>
     <div class="date-summary pixel" id="dateSummary"></div>
+    <button class="confirm-btn" id="addToCalendar">📅 Agregar a mi calendario</button>
     <button class="continue-btn" id="toNotify">CONTINUAR <span>&rarr;</span></button>
   </div>
 
@@ -148,7 +166,16 @@
     <footer>hecho con <span class="heart">♥</span> para ti</footer>
   </div>
 
+  <!-- SCREEN: TRACKING (para quien organizó, revisa el estado cuando quiera) -->
+  <div class="screen" id="tracking">
+    <h1 class="pixel" id="trackingHeading" style="font-size:15px;"></h1>
+    <div class="date-summary pixel" id="trackingDetails"></div>
+    <button class="confirm-btn" id="addToCalendarSender" style="display:none;">📅 Agregar a mi calendario</button>
+    <button class="continue-btn" id="refreshTracking">ACTUALIZAR <span>&#8635;</span></button>
+  </div>
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="script.js"></script>
 </body>
 </html>
