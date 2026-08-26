@@ -244,13 +244,11 @@ document.getElementById('clearAllActs').addEventListener('click', ()=>{
 // "Tus invitaciones" — consulta directo en Supabase todas las
 // filas de tu tabla (es tu propio proyecto, así que todas son
 // tuyas). Funciona desde cualquier dispositivo o navegador,
-// sin depender de nada guardado localmente.
+// sin depender de nada guardado localmente. La lista está
+// oculta por defecto detrás de un botón para no saturar el panel.
 // ============================================================
 async function renderMyInvites(){
-  const section = document.getElementById('myInvitesSection');
   const list = document.getElementById('myInvitesList');
-
-  section.style.display = 'block';
   list.innerHTML = '<div class="sub">Cargando...</div>';
 
   const { data: rows, error } = await sb.from('dates')
@@ -259,7 +257,7 @@ async function renderMyInvites(){
     .limit(30);
 
   if(error || !rows || rows.length === 0){
-    section.style.display = 'none';
+    list.innerHTML = '<div class="sub">Todavía no has enviado ninguna invitación.</div>';
     return;
   }
 
@@ -268,26 +266,25 @@ async function renderMyInvites(){
     const item = document.createElement('div');
     item.className = data.responded ? 'invite-item' : 'invite-item pending';
 
-    const textSpan = document.createElement('span');
-    if(data.responded){
-      let dateStr = data.chosen_date || '';
-      if(data.chosen_date){
-        const d = new Date(data.chosen_date + 'T00:00:00');
-        dateStr = d.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
-      }
-      textSpan.innerHTML = `<b>${data.recipient_name}</b>: ¡dijo que sí! ${data.chosen_activity} el ${dateStr}`;
-    } else {
-      textSpan.textContent = `${data.recipient_name}: esperando respuesta...`;
-    }
-    item.appendChild(textSpan);
+    const header = document.createElement('div');
+    header.className = 'invite-row-header';
 
+    const nameSpan = document.createElement('span');
+    nameSpan.innerHTML = `<b>${data.recipient_name}</b>`;
+    header.appendChild(nameSpan);
+
+    let viewBtn = null;
     if(data.responded){
-      const calBtn = document.createElement('button');
-      calBtn.className = 'mini-cal-btn';
-      calBtn.type = 'button';
-      calBtn.textContent = '📅';
-      calBtn.dataset.idx = i;
-      item.appendChild(calBtn);
+      viewBtn = document.createElement('button');
+      viewBtn.className = 'mini-view-btn';
+      viewBtn.type = 'button';
+      viewBtn.textContent = 'Ver respuesta';
+      header.appendChild(viewBtn);
+    } else {
+      const statusSpan = document.createElement('span');
+      statusSpan.className = 'status-pending';
+      statusSpan.textContent = 'esperando respuesta...';
+      header.appendChild(statusSpan);
     }
 
     const delBtn = document.createElement('button');
@@ -297,7 +294,28 @@ async function renderMyInvites(){
     delBtn.textContent = '🗑️';
     delBtn.dataset.id = data.id;
     delBtn.dataset.name = data.recipient_name;
-    item.appendChild(delBtn);
+    header.appendChild(delBtn);
+
+    item.appendChild(header);
+
+    if(data.responded){
+      let dateStr = data.chosen_date || '';
+      if(data.chosen_date){
+        const d = new Date(data.chosen_date + 'T00:00:00');
+        dateStr = d.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+      }
+      const detail = document.createElement('div');
+      detail.className = 'invite-detail';
+      detail.style.display = 'none';
+      detail.innerHTML = `¡Dijo que sí! ${data.chosen_activity} el ${dateStr} <button class="mini-cal-btn" data-idx="${i}" type="button">📅</button>`;
+      item.appendChild(detail);
+
+      viewBtn.addEventListener('click', ()=>{
+        const isOpen = detail.style.display !== 'none';
+        detail.style.display = isOpen ? 'none' : 'block';
+        viewBtn.textContent = isOpen ? 'Ver respuesta' : 'Ocultar';
+      });
+    }
 
     list.appendChild(item);
   });
@@ -326,6 +344,24 @@ async function renderMyInvites(){
     });
   });
 }
+
+document.getElementById('toggleInvites').addEventListener('click', async ()=>{
+  const list = document.getElementById('myInvitesList');
+  const refreshBtn = document.getElementById('refreshInvites');
+  const toggleBtn = document.getElementById('toggleInvites');
+  const isHidden = list.style.display === 'none';
+
+  if(isHidden){
+    list.style.display = 'flex';
+    refreshBtn.style.display = 'inline-block';
+    toggleBtn.textContent = 'Ocultar invitaciones';
+    await renderMyInvites();
+  } else {
+    list.style.display = 'none';
+    refreshBtn.style.display = 'none';
+    toggleBtn.textContent = 'Ver invitaciones enviadas';
+  }
+});
 
 document.getElementById('refreshInvites').addEventListener('click', renderMyInvites);
 
@@ -375,7 +411,10 @@ document.getElementById('generateLink').addEventListener('click', async ()=>{
   document.getElementById('trackingLink').value = trackUrl.toString();
   document.getElementById('linkResult').style.display = 'block';
 
-  renderMyInvites();
+  // Si la lista de invitaciones ya está abierta, la refresca con la nueva
+  if(document.getElementById('myInvitesList').style.display !== 'none'){
+    renderMyInvites();
+  }
 });
 
 function wireCopyButton(btnId, inputId){
@@ -406,7 +445,6 @@ async function boot(){
     document.getElementById('setupMessage').value = DEFAULT_MESSAGE;
     document.getElementById('setupClosing').value = DEFAULT_CLOSING;
     renderSetupChecks();
-    renderMyInvites();
     showScreen('setup');
     return;
   }
@@ -417,7 +455,6 @@ async function boot(){
     document.getElementById('setupMessage').value = DEFAULT_MESSAGE;
     document.getElementById('setupClosing').value = DEFAULT_CLOSING;
     renderSetupChecks();
-    renderMyInvites();
     showScreen('setup');
     document.getElementById('setupError').textContent = 'Ese enlace no es válido o ya no existe.';
     return;

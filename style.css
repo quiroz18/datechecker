@@ -233,22 +233,31 @@
     display:flex; flex-direction:column; gap:8px;
   }
   .invite-item{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
     background:#fff; border:2px solid var(--outline);
     padding:10px 12px; font-size:12px; font-weight:600;
     text-align:left; line-height:1.5;
   }
-  .invite-item.pending{ opacity:.7; font-style:italic; }
-  .invite-item span{ flex:1; }
+  .invite-item.pending{ opacity:.85; }
+  .invite-row-header{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .invite-row-header span{ flex:1; }
+  .status-pending{ font-style:italic; opacity:.75; flex:1; text-align:right; font-size:11px; }
   .invite-item .mini-cal-btn,
-  .invite-item .mini-del-btn{
-    font-family:'Quicksand',sans-serif; font-size:14px;
+  .invite-item .mini-del-btn,
+  .invite-item .mini-view-btn{
+    font-family:'Quicksand',sans-serif; font-size:12px; font-weight:700;
     border:2px solid var(--outline); cursor:pointer;
     padding:2px 8px; flex-shrink:0;
   }
-  .invite-item .mini-cal-btn{ background:var(--mint); }
-  .invite-item .mini-del-btn{ background:#ffe3e3; }
+  .invite-item .mini-cal-btn{ background:var(--mint); font-size:14px; }
+  .invite-item .mini-del-btn{ background:#ffe3e3; font-size:14px; }
   .invite-item .mini-del-btn:disabled{ opacity:.5; cursor:wait; }
+  .invite-item .mini-view-btn{ background:var(--cream); color:var(--accent-dark); }
+  .invite-detail{
+    margin-top:8px; padding-top:8px; border-top:1px dashed var(--outline);
+    font-weight:600; font-size:12px;
+  }
   .link-box{ display:flex; gap:8px; margin-top:8px; }
   .link-box input{
     flex:1; font-family:'Quicksand',sans-serif; font-size:12px;
